@@ -102,7 +102,8 @@ class GroupDetailListApiView(APIView):
 
 class ProductDetailApiView(APIView):
     """ This class displays the detail view of a product.
-        additionally you can perform various actions on products"""
+        additionally you can perform various actions on products
+        """
     def get(self, request, pk):
         queryset = Product.objects.get(pk=pk)
         serializer = ProductSerializer(queryset)
