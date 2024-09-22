@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # local apps
-    'books.apps.BooksConfig',
     'product.apps.ProductConfig',
 
     # import apps
