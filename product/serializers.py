@@ -1,8 +1,13 @@
+from django.db.models import Avg
 from rest_framework import serializers
-from product.models import Category, Group, Product, ProductAttributeValue, ProductImage
+from product.models import (
+    Category, Group, Product,
+    ProductAttributeValue, ProductImage,
+    Comment)
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """ This class is used to display only categories """
     count = serializers.SerializerMethodField(method_name='groups_count')
 
     def groups_count(self, obj):
@@ -15,48 +20,90 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    """ This class is used to display only products images """
+
     class Meta:
         model = ProductImage
         fields = ['image']
 
 
+class ProductCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'rating', 'user', 'image', 'text']
+        read_only_fields = ['id']
+
+
 class ProductAttributeValueSerializer(serializers.ModelSerializer):
-    image = ProductImageSerializer(many=True, read_only=True)
+    """ This class is used to display products attribute key and values. """
 
     class Meta:
         model = ProductAttributeValue
-        fields = ['attribute', 'value', 'image']
+        fields = ['key', 'value']
+
+    def to_representation(self, instance):
+        return {instance.key.key: instance.value.value}
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    """ This class is used to display products details,
+    this means it contains all product attributes (from attribute key to image)"""
     attributes = ProductAttributeValueSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
+    comments = ProductCommentSerializer(many=True, read_only=True)
+    user_like = serializers.SerializerMethodField()
+
+    def get_user_like(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.users_like.filter(id=request.user.id).exists()
+        return False
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'price', 'discount', 'quantity', 'slug', 'attributes']
-        read_only_fields = ['id', 'slug']
+        fields = ['id', 'title', 'description', 'price', 'discount', 'quantity', 'slug', 'user_like', 'images',
+                  'attributes', 'comments']
+        read_only_fields = ['id', 'slug', 'user_like']
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    attributes = ProductAttributeValueSerializer(many=True, read_only=True)
+    """ This class is used to display only products details """
+    avg_rating = serializers.SerializerMethodField()
+    user_like = serializers.SerializerMethodField()
+
+    def get_user_like(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.users_like.filter(id=request.user.id).exists()
+        return False
+
+    def get_avg_rating(self, obj):
+        rating = obj.comments.aggregate(avg=Avg('rating'))['avg']
+        if rating:
+            return rating
+        return 0
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'price', 'discount', 'quantity', 'description', 'slug', 'group_id', 'attributes']
-        read_only_fields = ['id', 'slug']
+        fields = ['id', 'title', 'price', 'discount', 'quantity', 'description', 'slug', 'avg_rating', 'user_like', 'group']
+        read_only_fields = ['id', 'slug', 'user_like']
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    """ This class is used to display groups with their products"""
     products = ProductSerializer(many=True, read_only=True)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = Group
-        fields = ['id', 'title', 'image', 'slug', 'products']
+        fields = ['id', 'title', 'image', 'slug', 'category', 'products']
         read_only_fields = ['id', 'slug']
 
 
 class CategoriesGroupsProductsSerializer(serializers.ModelSerializer):
+    """ This class is used to display categories with their groups and products"""
     groups = GroupSerializer(many=True, read_only=True)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = Category

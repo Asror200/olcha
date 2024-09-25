@@ -1,5 +1,8 @@
 from django.contrib import admin
-from product.models import Product, Category, Group, Attribute, ProductAttributeValue, Value, ProductImage
+from product.models import (
+    Product, Category, Group,
+    AttributeKey, ProductAttributeValue,
+    ProductImage, Comment, AttributeValue)
 
 
 # Register your models here.
@@ -23,15 +26,16 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'price', 'discount', 'quantity', 'group_id']
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ['title', 'group_id']
+    autocomplete_fields = ('users_like',)
 
 
-@admin.register(Attribute)
+@admin.register(AttributeKey)
 class ProductAttributeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'attribute']
-    search_fields = ['attribute']
+    list_display = ['id', 'key']
+    search_fields = ['key']
 
 
-@admin.register(Value)
+@admin.register(AttributeValue)
 class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_display = ['id', 'value']
     search_fields = ['value']
@@ -39,11 +43,17 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
 
 @admin.register(ProductAttributeValue)
 class ProductValueAdmin(admin.ModelAdmin):
-    list_display = ['id', 'product', 'attribute', 'value']
+    list_display = ['id', 'product', 'key', 'value']
     search_fields = ['product', 'value']
 
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['id', 'product', 'image']
+    search_fields = ['product']
+
+
+@admin.register(Comment)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['id', 'rating', 'product', 'user', 'image', 'text']
     search_fields = ['product']

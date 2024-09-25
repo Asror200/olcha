@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.template.defaultfilters import slugify
 
@@ -29,7 +30,7 @@ class Category(models.Model):
 class Group(BaseModel):
     title = models.CharField(max_length=100, unique=True)
     image = models.ImageField(upload_to='group')
-    category_id = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='groups')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='groups')
     slug = models.SlugField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -48,7 +49,8 @@ class Product(BaseModel):
     discount = models.FloatField(null=True, blank=True)
     quantity = models.IntegerField()
     slug = models.SlugField(blank=True)
-    group_id = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='products')
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='products')
+    users_like = models.ManyToManyField(User, related_name='products', null=True, blank=True)
 
     @property
     def discounted_price(self):
@@ -65,14 +67,14 @@ class Product(BaseModel):
         return self.title
 
 
-class Attribute(models.Model):
-    attribute = models.CharField(max_length=100, unique=True)
+class AttributeKey(models.Model):
+    key = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.attribute
+        return self.key
 
 
-class Value(models.Model):
+class AttributeValue(models.Model):
     value = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -80,15 +82,34 @@ class Value(models.Model):
 
 
 class ProductAttributeValue(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product_attributes')
-    attribute = models.ForeignKey(Attribute, on_delete=models.SET_NULL, null=True, related_name='product_attributes')
-    value = models.ForeignKey(Value, on_delete=models.SET_NULL, null=True,
-                              related_name='product_attributes')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='attributes')
+    key = models.ForeignKey(AttributeKey, on_delete=models.SET_NULL, null=True, related_name='attributes')
+    value = models.ForeignKey(AttributeValue, on_delete=models.SET_NULL, null=True,
+                              related_name='attributes')
 
     def __str__(self):
-        return f'{self.product}, {self.attribute}, {self.value}'
+        return f'{self.product}, {self.key}, {self.value}'
 
 
 class ProductImage(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product_images')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='images')
     image = models.ImageField(upload_to='product', default=None)
+    is_primary = models.BooleanField(default=False)
+
+
+class Comment(BaseModel):
+    class RatingChoices(models.IntegerChoices):
+        ZERO = 0
+        ONE = 1
+        TWO = 2
+        THREE = 3
+        FOUR = 4
+        FIVE = 5
+    rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.ZERO.value)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='comments')
+    text = models.TextField()
+    image = models.FileField(upload_to='comments', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.product} - {self.user}'
