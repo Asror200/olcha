@@ -3,7 +3,7 @@ from rest_framework import serializers
 from product.models import (
     Category, Group, Product,
     ProductAttributeValue, ProductImage,
-    Comment)
+    Comment, AttributeKey, AttributeValue)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class ProductCommentSerializer(serializers.ModelSerializer):
 
 
 class ProductAttributeValueSerializer(serializers.ModelSerializer):
-    """ This class is used to display products attribute key and values. """
+    """ This class is used to display products attribute (key and values). """
 
     class Meta:
         model = ProductAttributeValue
@@ -114,3 +114,29 @@ class CategoriesGroupsProductsSerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'title', 'image', 'slug', 'groups']
         read_only_fields = ['id', 'slug']
+
+
+class AttributeKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeKey
+        fields = '__all__'
+
+
+class AttributeValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValue
+        fields = '__all__'
+
+
+class AttributeKeyValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAttributeValue
+        exclude = ('id', 'product', 'key', 'value')
+
+    def to_representation(self, instance):
+        context = super(AttributeKeyValueSerializer, self).to_representation(instance)
+        context['key_id'] = instance.key.id
+        context['key_name'] = instance.key.key
+        context['value_id'] = instance.value.id
+        context['value_name'] = instance.value.value
+        return context

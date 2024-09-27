@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from product import serializers
-from product.models import Product
+from product.models import Product, AttributeKey, AttributeValue, ProductAttributeValue
 from django.http import Http404
 
 
@@ -58,3 +58,18 @@ class ProductAddView(generics.ListCreateAPIView):
     """ This class is used to add a new product to the database """
     queryset = Product.objects.order_by('id')[:1]
     serializer_class = serializers.ProductSerializer
+
+
+class AttributeKeyListApiView(generics.ListCreateAPIView):
+    queryset = AttributeKey.objects.all()
+    serializer_class = serializers.AttributeKeySerializer
+
+
+class AttributeValueListApiView(generics.ListCreateAPIView):
+    queryset = AttributeValue.objects.all()
+    serializer_class = serializers.AttributeValueSerializer
+
+
+class AttributeKeyValueListApiView(generics.ListCreateAPIView):
+    queryset = ProductAttributeValue.objects.all()
+    serializer_class = serializers.AttributeKeyValueSerializer
