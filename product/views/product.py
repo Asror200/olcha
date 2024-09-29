@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from product import serializers
 from product.models import Product, AttributeKey, AttributeValue, ProductAttributeValue

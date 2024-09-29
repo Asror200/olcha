@@ -1,4 +1,5 @@
 from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from product import serializers
 from product.models import Group
@@ -7,7 +8,7 @@ from product.models import Group
 class GroupDetailListApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class displays detail of a group (products list),
         in this class you can perform various actions on groups """
-
+    permission_classes = (IsAuthenticated,)
     serializer_class = serializers.GroupSerializer
     lookup_field = 'slug'
 
