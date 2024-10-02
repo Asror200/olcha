@@ -1,14 +1,15 @@
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from product.models import Category
 from product import serializers
+from product.permissions import IsOwnerOrReadOnly
 
 
 class CategoriesDetailListApiView(generics.ListCreateAPIView):
     """ This class displays list of categories,
         you can also add a new category """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [AllowAny]
     queryset = Category.objects.prefetch_related('groups__products').all()
     serializer_class = serializers.CategoriesGroupsProductsSerializer
 
@@ -16,6 +17,7 @@ class CategoriesDetailListApiView(generics.ListCreateAPIView):
 class CategoryDetailApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class displays detail of category,
         in this class you can perform various actions on a category """
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     serializer_class = serializers.CategoriesGroupsProductsSerializer
     lookup_field = 'slug'
 

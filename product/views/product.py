@@ -4,9 +4,12 @@ from product import serializers
 from product.models import Product, AttributeKey, AttributeValue, ProductAttributeValue
 from django.http import Http404
 
+from product.permissions import IsOwnerOrReadOnly
+
 
 class ProductsListApiView(generics.ListCreateAPIView):
     """ This class used to display all products, and you can add a new product """
+    permission_classes = (permissions.AllowAny,)
     queryset = Product.objects.all()
     serializer_class = serializers.ProductSerializer
 
@@ -15,6 +18,7 @@ class ProductDetailApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class is used to display a detail view of product,
         additionally you can perform various actions on products
         """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
     serializer_class = serializers.ProductDetailSerializer
     lookup_field = 'slug'
 
@@ -54,9 +58,8 @@ class ProductDetailApiView(generics.RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ProductAddView(generics.ListCreateAPIView):
+class ProductAddView(generics.CreateAPIView):
     """ This class is used to add a new product to the database """
-    queryset = Product.objects.order_by('id')[:1]
     serializer_class = serializers.ProductSerializer
 
 

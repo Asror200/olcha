@@ -8,7 +8,6 @@ from product.models import Group
 class GroupDetailListApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class displays detail of a group (products list),
         in this class you can perform various actions on groups """
-    permission_classes = (IsAuthenticated,)
     serializer_class = serializers.GroupSerializer
     lookup_field = 'slug'
 
@@ -36,6 +35,5 @@ class GroupDetailListApiView(generics.RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GroupAddView(generics.ListCreateAPIView):
-    queryset = Group.objects.order_by('id')[:1]
+class GroupAddView(generics.CreateAPIView):
     serializer_class = serializers.GroupSerializer

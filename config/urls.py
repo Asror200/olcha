@@ -19,14 +19,10 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from config import settings
 
+
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api-auth/', include('rest_framework.urls')),
                   path('olcha.uz/', include('product.urls')),
-                  path('olcha.uz/auth/', include('user.urls')),
-                  # path('olcha/v1/auth/', include('rest_framework.urls')),
-                  # path('olcha/dj-rest-auth/', include('dj_rest_auth.urls')),
-                  # path('olcha/dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
-
-
+                  path('olcha.uz/', include('user.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
