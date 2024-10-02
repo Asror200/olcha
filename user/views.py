@@ -1,8 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework import status, permissions, generics
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, OutstandingToken
 from user.serializers import UserSerializer
+
+
+# from rest_framework_simplejwt.tokens import BlacklistToken
 
 
 # Create your views here.
@@ -26,5 +29,9 @@ class UserLogoutView(APIView):
             token.blacklist()
 
             return Response(status=status.HTTP_205_RESET_CONTENT)
+        except KeyError as e:
+            return Response({"error": str(e)}, status=400)
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(f'error": "Something went wrong {e}', status=500)
+
+
