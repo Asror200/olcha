@@ -1,16 +1,15 @@
+from django.http import Http404
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
+
 from product import serializers
 from product.models import Product, AttributeKey, AttributeValue, ProductAttributeValue
-from django.http import Http404
-
-from product.permissions import IsOwnerOrReadOnly
 
 
 class ProductsListApiView(generics.ListCreateAPIView):
     """ This class used to display all products, and you can add a new product """
     permission_classes = (permissions.AllowAny,)
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related('comments', 'group', 'users_like').all()
     serializer_class = serializers.ProductSerializer
 
 
@@ -18,7 +17,7 @@ class ProductDetailApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class is used to display a detail view of product,
         additionally you can perform various actions on products
         """
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.ProductDetailSerializer
     lookup_field = 'slug'
 

@@ -76,16 +76,12 @@ class ProductSerializer(serializers.ModelSerializer):
         return obj.comments.count()
 
     def get_avg_rating(self, obj):
-        rating = obj.comments.aggregate(avg=Avg('rating'))['avg']
-        if rating:
-            return rating
-        return 0
+        rating = obj.comments.aggregate(avg=Avg('rating'))['avg'] or 0
+        return rating
 
     def get_user_like(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.users_like.filter(id=request.user.id).exists()
-        return False
+        user = self.context['request'].user
+        return obj.users_like.filter(id=user.id).exists()
 
     class Meta:
         model = Product
@@ -95,7 +91,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    """ This class is used to display groups with their products"""
+    """ This class is used to display groups with their products """
     products = ProductSerializer(many=True, read_only=True)
     image = serializers.ImageField(required=False)
 

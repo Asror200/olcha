@@ -10,14 +10,19 @@ class CategoriesDetailListApiView(generics.ListCreateAPIView):
     """ This class displays list of categories,
         you can also add a new category """
     permission_classes = [AllowAny]
-    queryset = Category.objects.prefetch_related('groups__products').all()
+    queryset = Category.objects.prefetch_related(
+        'groups',
+        'groups__products__comments',
+        'groups__products__images',
+        'groups__products__users_like'
+    )
     serializer_class = serializers.CategoriesGroupsProductsSerializer
 
 
 class CategoryDetailApiView(generics.RetrieveUpdateDestroyAPIView):
     """ This class displays detail of category,
         in this class you can perform various actions on a category """
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.CategoriesGroupsProductsSerializer
     lookup_field = 'slug'
 

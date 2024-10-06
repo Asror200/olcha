@@ -18,11 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from config import settings
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api-auth/', include('rest_framework.urls')),
                   path('olcha.uz/', include('product.urls')),
-                  path('olcha.uz/', include('user.urls')),
+                  path('auth/', include('user.urls')),
+                  path('post/', include('post.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += debug_toolbar_urls()

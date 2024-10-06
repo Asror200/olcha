@@ -36,7 +36,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
-
+SITE_ID = 1
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,12 +49,14 @@ INSTALLED_APPS = [
     # local apps
     'product.apps.ProductConfig',
     'user.apps.UserConfig',
+    'post.apps.PostConfig',
 
     # installed apps
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'debug_toolbar',
 
 ]
 
@@ -67,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -168,3 +171,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True
 }
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
