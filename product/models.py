@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.db.models import Avg
 
 
 # Create your models here.
@@ -58,6 +59,10 @@ class Product(BaseModel):
             return self.price * (1 - self.discount / 100)
         return self.price
 
+    @property
+    def average_rating(self):
+        return self.objects.annotate(average_rating=Avg('comments__rating'))['average_rating'] or 0
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
@@ -105,6 +110,7 @@ class Comment(BaseModel):
         THREE = 3
         FOUR = 4
         FIVE = 5
+
     rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.ZERO.value)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='comments')

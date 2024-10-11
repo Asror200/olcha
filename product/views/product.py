@@ -1,7 +1,7 @@
 from django.http import Http404
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-
+from django.core.cache import cache
 from product import serializers
 from product.models import Product, AttributeKey, AttributeValue, ProductAttributeValue
 
@@ -11,6 +11,22 @@ class ProductsListApiView(generics.ListCreateAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = Product.objects.prefetch_related('comments', 'group', 'users_like').all()
     serializer_class = serializers.ProductSerializer
+    cache_key = 'products-list'
+
+    def get_queryset(self):
+        cached_data = cache.get(self.cache_key)
+        if cached_data is not None:
+            return cached_data
+        return super().get_queryset()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+
+        cache.delete(self.cache_key)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ProductDetailApiView(generics.RetrieveUpdateDestroyAPIView):

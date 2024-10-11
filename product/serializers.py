@@ -68,16 +68,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """ This class is used to display only products details """
-    avg_rating = serializers.SerializerMethodField()
     user_like = serializers.SerializerMethodField()
     count_comments = serializers.SerializerMethodField()
 
     def get_count_comments(self, obj):
         return obj.comments.count()
-
-    def get_avg_rating(self, obj):
-        rating = obj.comments.aggregate(avg=Avg('rating'))['avg'] or 0
-        return rating
 
     def get_user_like(self, obj):
         user = self.context['request'].user
@@ -85,7 +80,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'price', 'discount', 'quantity', 'description', 'slug', 'avg_rating', 'user_like',
+        fields = ['id', 'title', 'price', 'discount', 'quantity', 'description', 'slug', 'average_rating', 'user_like',
                   'count_comments', 'group']
         read_only_fields = ['id', 'slug', 'user_like']
 
